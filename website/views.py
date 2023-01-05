@@ -17,3 +17,8 @@ def home(request):
         print(LandingPageDetails)
 
     return render(request, 'website/index.html', context)
+
+
+def website(request):
+    context = {}
+    return render(request, 'website/website.html', context)

@@ -8,12 +8,13 @@
   </head>
   <body>
     <div class="container">
-        <h1>White Page Generator</h1>
-        <br>
+
+
+        <div id="main-page" class="">
+            <h1>White Page Generator</h1>
         <hr>
         <form action="#" method="post">
             {% csrf_token %}
-
             <div class="mb-3">
               <label class="form-label">White Page Name</label>
               <input type="text" name="LandingPageName" class="form-control" placeholder="Enter Name of the Page" required>
@@ -23,12 +24,43 @@
               <label class="form-label">White Page Details</label>
               <input type="text" name="LandingPageDetails" class="form-control" placeholder="What does your Business Do?" required>
             </div>
-
-            <button type="submit" class="btn btn-primary" name="button">Get Website</button>
-
+            <button id="get-website-content" type="submit" class="btn btn-primary" name="button">Get Website</button>
         </form>
+        </div>
+
+        <div id="loading-page" class="">
+            <div class="row">
+                <div class="col-lg-3"></div>
+                <div class="col-lg-6">
+                    <h1>Working...</h1>
+                    <p class="lead">Do not refresh the page!</p>
+                    <br>
+                    <div style="width:100%;height:0;padding-bottom:55%;position:relative;">
+                    <iframe src="https://giphy.com/embed/iCbBAJpfvm17G" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+                    </div>
+                </div>
+                <div class="col-lg-3"></div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+
+
+  <script>
+
+      $(document).ready(function() {
+        $("#loading-page").hide();
+      });
+
+      $("#get-website-content").click(function() {
+        $("#main-page").hide();
+        $("#loading-page").show();
+      });
+
+  </script>
+
   </body>
 </html>

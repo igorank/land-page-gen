@@ -25,6 +25,7 @@ def get_services(text) -> list:
                              json={
                                  'text': f"Generate 3 short and punchy website service titles for a business: What business does: {text}"})
     answer = response.text.replace('\n', '').replace('1', '').replace('2', '').replace('3', '')
+    print(answer)
     stripped = answer.split('"', 1)[1]
     stripped = stripped.replace('"', '')
     answer_list = stripped.split('.')

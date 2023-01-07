@@ -1,5 +1,7 @@
 <!doctype html>
 <html lang="en">
+{% load static %}
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -36,7 +38,7 @@
                     <p class="lead">Do not refresh the page!</p>
                     <br>
                     <div style="width:100%;height:0;padding-bottom:55%;position:relative;">
-                    <iframe src="https://giphy.com/embed/iCbBAJpfvm17G" width="100%" height="100%" style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
+                    <img src="{% static 'loading.gif' %}" alt="loading GIF">
                     </div>
                 </div>
                 <div class="col-lg-3"></div>

@@ -14,6 +14,8 @@ def home(request):
         LandingPageName = request.POST['LandingPageName']
         LandingPageDetails = request.POST['LandingPageDetails']
 
+        context['LandingPageName'] = LandingPageName
+
         context['section1Title'] = getSection1Title(LandingPageDetails)
         context['section1Description'] = getSection1Description(LandingPageName, LandingPageDetails)
 
@@ -52,7 +54,7 @@ def home(request):
         context['feature3Title'] = features[2]['title']
         context['feature3Description'] = features[2]['description']
 
-        return render(request, 'website/ai-website.html', context)
+        return render(request, 'website/website1.html', context)
 
     return render(request, 'website/index.html', context)
 
@@ -60,3 +62,8 @@ def home(request):
 def website(request):
     context = {}
     return render(request, 'website/website.html', context)
+
+
+def website1(request):
+    context = {}
+    return render(request, 'website/website1.html', context)

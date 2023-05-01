@@ -54,6 +54,9 @@ def home(request):
         context['feature3Title'] = features[2]['title']
         context['feature3Description'] = features[2]['description']
 
+        print(type(context))    # TEMP
+        print(context)  # TEMP
+
         return render(request, 'website/website1.html', context)
 
     return render(request, 'website/index.html', context)

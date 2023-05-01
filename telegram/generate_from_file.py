@@ -1,8 +1,14 @@
 import os
 import zipfile
-from shutil import copytree
+from shutil import copytree, rmtree
 from jinja2 import Environment, FileSystemLoader
 from website import aigenerator
+
+
+cwd = os.getcwd()
+root = os.path.split(os.path.split(cwd)[0])[0] + '\\' \
+       + os.path.split(os.path.split(cwd)[0])[1]
+templates_dir = os.path.join(root, 'templates')
 
 
 def list_dirs(root_dir: str) -> list:
@@ -38,23 +44,25 @@ def zipdir(path, ziph):
             ziph.write(os.path.join(root, file), os.path.join(folder, file))
 
 
-cwd = os.getcwd()
-root = os.path.split(os.path.split(cwd)[0])[0] + '\\' \
-       + os.path.split(os.path.split(cwd)[0])[1]
+def get_list_of_dirs(directory) -> list:  # возвращает список папок без папки "website"
+    dirs = list_dirs(directory)
+    dirs.remove("website")
+    return dirs
 
-templates_dir = os.path.join(root, 'templates')
-dirs = list_dirs((templates_dir))
-dirs.remove("website")
-template_dir = templates_dir + "\\" + "Software" + "\\" + "1"
-env = Environment(loader=FileSystemLoader(template_dir))
-template = env.get_template('index.html')
 
-copytree(template_dir, root + "\\" + "generated", dirs_exist_ok=True)
+def generate(root, templs_dir, site_category):
+    template_dir = templs_dir + "\\" + f"{site_category}" + "\\" + "1"
+    env = Environment(loader=FileSystemLoader(template_dir))
+    template = env.get_template('index.html')
 
-filename = os.path.join(root, 'generated', 'index.html')
-with open(filename, 'w') as fh:
-    fh.write(template.render(
-        get_context()))
+    copytree(template_dir, root + "\\" + "generated", dirs_exist_ok=True)
 
-with zipfile.ZipFile(root + "\\" + 'template.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-    zipdir(root + "\\" + "generated", zipf)
+    filename = os.path.join(root, 'generated', 'index.html')
+    with open(filename, 'w') as fh:
+        fh.write(template.render(
+            get_context()))
+
+    with zipfile.ZipFile(root + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+        zipdir(root + "\\" + "generated", zipf)
+
+    rmtree(root + "\\" + "generated")

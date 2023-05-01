@@ -1,3 +1,4 @@
+import os
 import logging
 
 import aiogram.utils.markdown as md
@@ -9,7 +10,14 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import executor
 
+from generate_from_file import get_list_of_dirs, generate
+
 logging.basicConfig(level=logging.INFO)
+
+cwd = os.getcwd()
+root = os.path.split(os.path.split(cwd)[0])[0] + '\\' \
+       + os.path.split(os.path.split(cwd)[0])[1]
+templates_dir = os.path.join(root, 'templates')
 
 API_TOKEN = '6211790389:AAEZI-aryehqSpbbQWPwnn3k9B2sOBrVlNs'
 MENU = ["Сгенерировать вайт", "Помощь", "Баланс", "Профиль"]
@@ -36,6 +44,7 @@ class Form(StatesGroup):
     choosing_solution = State()
     choosing_landing_page_name = State()
     choosing_landing_page_details = State()
+    choosing_landing_page_category = State()
     help = State()
 
 
@@ -91,15 +100,15 @@ async def process_solution(message: types.Message, state: FSMContext):
         case "Сгенерировать вайт":
             await state.set_state(Form.choosing_landing_page_name)
 
-            # inline_btn = types.InlineKeyboardButton('Назад', callback_data='back')
-            # inline_kb = types.InlineKeyboardMarkup().add(inline_btn)
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
             markup.add("Назад")
 
             await message.answer("Введите название вайта", reply_markup=markup)
         case "Помощь":
             await message.answer(help_text)
-            # await message.answer(f"Ваш ID: {message.from_user.id}", reply_markup=types.ReplyKeyboardRemove())
+        case "Профиль":
+            await message.answer(f"Ваш ID: {message.from_user.id}\n"
+                                 f"Ваш никнейм: {message.from_user.username}")
         case _:
             pass
 
@@ -139,9 +148,42 @@ async def process_landing_page_details(message: types.Message, state: FSMContext
     async with state.proxy() as data:
         data['landing_page_details'] = message.text
 
-    # await state.set_state(Form.choosing_landing_page_details)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+    markup.add("Назад")
+
+    dirs = get_list_of_dirs(templates_dir)
+    dirs.sort()
+    newline = "\n"
+
+    await state.set_state(Form.choosing_landing_page_category)
+    await message.answer(f'Выберите категорию сайта:\n {newline.join(f"{value}" for value in dirs)}',
+                         reply_markup=markup)
+
+
+@dp.message_handler(lambda message: message.text == "Назад", state=Form.choosing_landing_page_category)
+async def details_back(message: types.Message, state: FSMContext):
+    await state.set_state(Form.choosing_landing_page_details)
+    await bot.send_message(message.from_user.id, "Введите описание вайт пейджа")
+
+
+@dp.message_handler(lambda message: message.text not in get_list_of_dirs(templates_dir),
+                    state=Form.choosing_landing_page_category)
+async def process_solution_invalid(message: types.Message):
+    return await message.reply("Категория не найдена")
+
+
+@dp.message_handler(state=Form.choosing_landing_page_category)
+async def process_landing_page_details(message: types.Message, state: FSMContext):
+    if not message.text:
+        await message.reply("Недопустимая категория")
+
+    async with state.proxy() as data:
+        data['landing_page_category'] = message.text
+
+        generate(root, templates_dir, data['landing_page_category'])
+
     await state.set_state(Form.choosing_solution)
-    await message.answer_document(open("C:\\Users\\igor_\\Documents\\Projects\\land-page-gen\\template.zip", "rb"))
+    await message.answer_document(open(root + "\\white_page.zip", "rb"))
     await message.answer(start_text, reply_markup=get_menu_markup())
 
 

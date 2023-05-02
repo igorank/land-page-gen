@@ -20,7 +20,7 @@ root = os.path.split(os.path.split(cwd)[0])[0] + '\\' \
 templates_dir = os.path.join(root, 'templates')
 
 API_TOKEN = '6211790389:AAEZI-aryehqSpbbQWPwnn3k9B2sOBrVlNs'
-MENU = ["Сгенерировать вайт", "Помощь", "Баланс", "Профиль"]
+MENU = ["💎 Сгенерировать вайт", "🆘 Помощь", "💳 Баланс", "📄 Профиль"]
 start_text = "Привет, этот бот может генерировать уникальные вайты 😎"
 file_help = open('help.txt', 'r', encoding='UTF-8')
 help_text = file_help.read()
@@ -34,8 +34,8 @@ dp = Dispatcher(bot, storage=storage)
 
 def get_menu_markup():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    markup.add("Сгенерировать вайт", "Помощь")
-    markup.add("Баланс", "Профиль")
+    markup.add("💎 Сгенерировать вайт", "🆘 Помощь")
+    markup.add("💳 Баланс", "📄 Профиль")
     return markup
 
 
@@ -61,8 +61,8 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
     # Configure ReplyKeyboardMarkup
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    markup.add("Сгенерировать вайт", "Помощь")
-    markup.add("Баланс", "Профиль")
+    markup.add("💎 Сгенерировать вайт", "🆘 Помощь")
+    markup.add("💳 Баланс", "📄 Профиль")
 
     await message.reply(start_text, reply_markup=get_menu_markup())
 
@@ -97,16 +97,16 @@ async def process_solution(message: types.Message, state: FSMContext):
         data['sol1'] = message.text
 
     match data['sol1']:
-        case "Сгенерировать вайт":
+        case "💎 Сгенерировать вайт":
             await state.set_state(Form.choosing_landing_page_name)
 
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
             markup.add("Назад")
 
             await message.answer("Введите название вайта", reply_markup=markup)
-        case "Помощь":
+        case "🆘 Помощь":
             await message.answer(help_text)
-        case "Профиль":
+        case "📄 Профиль":
             await message.answer(f"Ваш ID: {message.from_user.id}\n"
                                  f"Ваш никнейм: {message.from_user.username}")
         case _:
@@ -156,7 +156,7 @@ async def process_landing_page_details(message: types.Message, state: FSMContext
     newline = "\n"
 
     await state.set_state(Form.choosing_landing_page_category)
-    await message.answer(f'Выберите категорию сайта:\n {newline.join(f"{value}" for value in dirs)}',
+    await message.answer(f'Выберите категорию сайта:\n{newline.join(f"{value}" for value in dirs)}',
                          reply_markup=markup)
 
 
@@ -177,14 +177,19 @@ async def process_landing_page_details(message: types.Message, state: FSMContext
     if not message.text:
         await message.reply("Недопустимая категория")
 
+    await message.answer("Вайт-пейдж генерируется...", reply_markup=types.ReplyKeyboardRemove())
+
     async with state.proxy() as data:
         data['landing_page_category'] = message.text
-
-        generate(root, templates_dir, data['landing_page_category'])
-
-    await state.set_state(Form.choosing_solution)
-    await message.answer_document(open(root + "\\white_page.zip", "rb"))
-    await message.answer(start_text, reply_markup=get_menu_markup())
+        page_data = {'name': data['landing_page_name'], 'details': data['landing_page_details']}
+        if not generate(root, templates_dir, data['landing_page_category'], page_data):
+            await state.set_state(Form.choosing_solution)
+            await message.answer("Ошибка: Вы достигли лимита. Пожалуйста, повторите попытку позже.")
+            await message.answer(start_text, reply_markup=get_menu_markup())
+        else:
+            await state.set_state(Form.choosing_solution)
+            await message.answer_document(open(root + "\\white_page.zip", "rb"))
+            await message.answer(start_text, reply_markup=get_menu_markup())
 
 
 @dp.message_handler(state=Form.help)

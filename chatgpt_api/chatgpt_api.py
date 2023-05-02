@@ -5,6 +5,7 @@ from gevent.pywsgi import WSGIServer
 from flask import Flask, request, abort
 from geventwebsocket.handler import WebSocketHandler
 from revChatGPT.V1 import Chatbot
+from revChatGPT.typings import Error
 # from chatgpt import ChatGPT
 
 
@@ -23,8 +24,11 @@ def link_receiver():
     if sem.ready():
         sem.acquire()
         response = ""
-        for data in chatbot.ask(data["text"]):
-            response = data["message"]
+        try:
+            for data in chatbot.ask(data["text"]):
+                response = data["message"]
+        except Error:
+            abort(429)
         sem.release()
         return response
     return abort(500)

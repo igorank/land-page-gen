@@ -27,10 +27,61 @@ def list_dirs(root_dir: str) -> list:
     return list_of_dirs
 
 
-def get_context() -> dict:
+def get_context(landing_page_name: str, landing_page_details: str) -> dict:
+
     context = {}
-    context['LandingPageName'] = "Test"
-    context['section1Title'] = "Test"
+    context['LandingPageName'] = landing_page_name
+
+    blocks = []
+    blocks_titles = aigenerator.getSection1Title(landing_page_details)
+    block_descriptions = aigenerator.getSection1Description(landing_page_name, landing_page_details)
+    for index, block in enumerate(blocks_titles):
+        obj = {}
+        block_description = block_descriptions[index]
+        obj['title'] = block
+        obj['description'] = block_description
+        blocks.append(obj)
+
+    context['section1Title'] = blocks[0]['title']
+    context['section1Description'] = blocks[0]['description']
+
+    services = []
+    service_titles = aigenerator.get_services(landing_page_details)
+    for service in service_titles:
+        obj = {}
+        service_description = aigenerator.get_service_description(service)
+        obj['title'] = service
+        obj['description'] = service_description
+        services.append(obj)
+
+    features = []
+    features_titles = aigenerator.get_features(landing_page_details)
+    for feature in features_titles:
+        obj = {}
+        feature_description = aigenerator.get_service_description(feature)
+        obj['title'] = feature
+        obj['description'] = feature_description
+        features.append(obj)
+
+    context['service1Title'] = services[0]['title']
+    context['service1Description'] = services[0]['description']
+    context['service2Title'] = services[1]['title']
+    context['service2Description'] = services[1]['description']
+    context['service3Title'] = services[2]['title']
+    context['service3Description'] = services[2]['description']
+
+    context['section2Title'] = blocks[1]['title']
+    context['section2Description'] = blocks[1]['description']
+    context['section3Title'] = blocks[2]['title']
+    context['section3Description'] = blocks[2]['description']
+
+    context['feature1Title'] = features[0]['title']
+    context['feature1Description'] = features[0]['description']
+    context['feature2Title'] = features[1]['title']
+    context['feature2Description'] = features[1]['description']
+    context['feature3Title'] = features[2]['title']
+    context['feature3Description'] = features[2]['description']
+
     return context
 
 
@@ -50,7 +101,7 @@ def get_list_of_dirs(directory) -> list:  # возвращает список п
     return dirs
 
 
-def generate(root, templs_dir, site_category):
+def generate(root, templs_dir, site_category, page_data: dict) -> bool:
     template_dir = templs_dir + "\\" + f"{site_category}" + "\\" + "1"
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template('index.html')
@@ -58,11 +109,15 @@ def generate(root, templs_dir, site_category):
     copytree(template_dir, root + "\\" + "generated", dirs_exist_ok=True)
 
     filename = os.path.join(root, 'generated', 'index.html')
-    with open(filename, 'w') as fh:
-        fh.write(template.render(
-            get_context()))
+    try:
+        with open(filename, 'w') as fh:
+            fh.write(template.render(
+                get_context(page_data['name'], page_data['details'])))
+    except Exception:
+        return False
 
     with zipfile.ZipFile(root + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
         zipdir(root + "\\" + "generated", zipf)
 
     rmtree(root + "\\" + "generated")
+    return True

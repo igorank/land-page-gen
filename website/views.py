@@ -16,7 +16,7 @@ def home(request):
 
         context['LandingPageName'] = LandingPageName
 
-        context['section1Title'] = getSection1Title(LandingPageDetails)
+        context['section1Title'] = getSection1Title(LandingPageDetails)[0]
         context['section1Description'] = getSection1Description(LandingPageName, LandingPageDetails)
 
         services = []
@@ -53,9 +53,6 @@ def home(request):
         context['feature2Description'] = features[1]['description']
         context['feature3Title'] = features[2]['title']
         context['feature3Description'] = features[2]['description']
-
-        print(type(context))    # TEMP
-        print(context)  # TEMP
 
         return render(request, 'website/website1.html', context)
 

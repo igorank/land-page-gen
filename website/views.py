@@ -32,7 +32,7 @@ def home(request):
         features_titles = get_features(LandingPageDetails)
         for feature in features_titles:
             obj = {}
-            feature_description = get_service_description(feature)
+            feature_description = get_feature_description(feature)
             obj['title'] = feature
             obj['description'] = feature_description
             features.append(obj)

@@ -109,12 +109,13 @@ def generate(root, templs_dir, site_category, page_data: dict) -> bool:
     copytree(template_dir, root + "\\" + "generated", dirs_exist_ok=True)
 
     filename = os.path.join(root, 'generated', 'index.html')
-    try:
-        with open(filename, 'w') as fh:
-            fh.write(template.render(
-                get_context(page_data['name'], page_data['details'])))
-    except Exception:
-        return False
+    # try:
+    with open(filename, 'w') as fh:
+        fh.write(template.render(
+            get_context(page_data['name'], page_data['details'])))
+    # except Exception as exception:
+    #     print(exception)    # TEMP
+    #     return False
 
     with zipfile.ZipFile(root + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
         zipdir(root + "\\" + "generated", zipf)

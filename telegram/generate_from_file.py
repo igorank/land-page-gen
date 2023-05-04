@@ -1,5 +1,6 @@
 import os
 import zipfile
+from random import choice
 from shutil import copytree, rmtree
 from jinja2 import Environment, FileSystemLoader
 from website import aigenerator
@@ -102,20 +103,23 @@ def get_list_of_dirs(directory) -> list:  # возвращает список п
 
 
 def generate(root, templs_dir, site_category, page_data: dict) -> bool:
-    template_dir = templs_dir + "\\" + f"{site_category}" + "\\" + "1"
-    env = Environment(loader=FileSystemLoader(template_dir))
+    template_dir = templs_dir + "\\" + f"{site_category}" + "\\"
+    category_dirs = os.listdir(template_dir)
+    full_path = template_dir + str(choice(category_dirs))
+    print(full_path)    # TEMP
+    env = Environment(loader=FileSystemLoader(full_path))
     template = env.get_template('index.html')
 
-    copytree(template_dir, root + "\\" + "generated", dirs_exist_ok=True)
+    copytree(full_path, root + "\\" + "generated", dirs_exist_ok=True)
 
     filename = os.path.join(root, 'generated', 'index.html')
-    # try:
-    with open(filename, 'w') as fh:
-        fh.write(template.render(
-            get_context(page_data['name'], page_data['details'])))
-    # except Exception as exception:
-    #     print(exception)    # TEMP
-    #     return False
+    try:
+        with open(filename, 'w') as fh:
+            fh.write(template.render(
+                get_context(page_data['name'], page_data['details'])))
+    except Exception as exception:
+        print(exception)    # TEMP
+        return False
 
     with zipfile.ZipFile(root + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
         zipdir(root + "\\" + "generated", zipf)

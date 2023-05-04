@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 from gpt4free import you

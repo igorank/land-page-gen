@@ -166,7 +166,7 @@ async def process_landing_page_details(message: types.Message, state: FSMContext
         page_data = {'name': data['landing_page_name'], 'details': data['landing_page_details']}
         if not generate(root, templates_dir, data['landing_page_category'], page_data):
             await state.set_state(Form.choosing_solution)
-            await message.answer("Ошибка: Пожалуйста, повторите попытку позже.",
+            await message.answer("😞 Ошибка: Пожалуйста, повторите попытку позже.",
                                  reply_markup=get_menu_markup())
             # await message.answer(start_text, reply_markup=get_menu_markup())
         else:

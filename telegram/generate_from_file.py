@@ -1,9 +1,11 @@
 import os
 import zipfile
+from random_username.generate import generate_username
 from random import choice
 from shutil import copytree, rmtree
 from jinja2 import Environment, FileSystemLoader
 from website import aigenerator
+from random_phone import RandomUkPhone
 
 
 cwd = os.getcwd()
@@ -34,8 +36,8 @@ def get_context(landing_page_name: str, landing_page_details: str) -> dict:
     context['LandingPageName'] = landing_page_name
 
     blocks = []
-    blocks_titles = aigenerator.getSection1Title(landing_page_details)
-    block_descriptions = aigenerator.getSection1Description(landing_page_name, landing_page_details)
+    blocks_titles = aigenerator.get_section_titles(landing_page_details)
+    block_descriptions = aigenerator.get_section_descriptions(landing_page_name, landing_page_details)
     for index, block in enumerate(blocks_titles):
         obj = {}
         block_description = block_descriptions[index]
@@ -59,7 +61,7 @@ def get_context(landing_page_name: str, landing_page_details: str) -> dict:
     features_titles = aigenerator.get_features(landing_page_details)
     for feature in features_titles:
         obj = {}
-        feature_description = aigenerator.get_service_description(feature)
+        feature_description = aigenerator.get_feature_description(landing_page_name, feature)
         obj['title'] = feature
         obj['description'] = feature_description
         features.append(obj)
@@ -83,6 +85,11 @@ def get_context(landing_page_name: str, landing_page_details: str) -> dict:
     context['feature3Title'] = features[2]['title']
     context['feature3Description'] = features[2]['description']
 
+    rukp = RandomUkPhone()
+    context['username'] = generate_username()[0]
+    context['mobile_phone'] = rukp.random_mobile()
+    context['email'] = context['username'] + "@gmail.com"
+
     return context
 
 
@@ -90,10 +97,10 @@ def zipdir(path, ziph):
     length = len(path)
 
     # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
-        folder = root[length:]
+    for root_dir, _, files in os.walk(path):
+        folder = root_dir[length:]
         for file in files:
-            ziph.write(os.path.join(root, file), os.path.join(folder, file))
+            ziph.write(os.path.join(root_dir, file), os.path.join(folder, file))
 
 
 def get_list_of_dirs(directory) -> list:  # возвращает список папок без папки "website"
@@ -102,7 +109,7 @@ def get_list_of_dirs(directory) -> list:  # возвращает список п
     return dirs
 
 
-def generate(root, templs_dir, site_category, page_data: dict) -> bool:
+def generate(root_dir, templs_dir, site_category, page_data: dict) -> bool:
     template_dir = templs_dir + "\\" + f"{site_category}" + "\\"
     category_dirs = os.listdir(template_dir)
     full_path = template_dir + str(choice(category_dirs))
@@ -110,19 +117,19 @@ def generate(root, templs_dir, site_category, page_data: dict) -> bool:
     env = Environment(loader=FileSystemLoader(full_path))
     template = env.get_template('index.html')
 
-    copytree(full_path, root + "\\" + "generated", dirs_exist_ok=True)
+    copytree(full_path, root_dir + "\\" + "generated", dirs_exist_ok=True)
 
-    filename = os.path.join(root, 'generated', 'index.html')
+    filename = os.path.join(root_dir, 'generated', 'index.html')
     try:
-        with open(filename, 'w') as fh:
-            fh.write(template.render(
+        with open(filename, 'w') as file:
+            file.write(template.render(
                 get_context(page_data['name'], page_data['details'])))
     except Exception as exception:
         print(exception)    # TEMP
         return False
 
-    with zipfile.ZipFile(root + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipdir(root + "\\" + "generated", zipf)
+    with zipfile.ZipFile(root_dir + "\\" + 'white_page.zip', 'w', zipfile.ZIP_DEFLATED) as zipf:
+        zipdir(root_dir + "\\" + "generated", zipf)
 
-    rmtree(root + "\\" + "generated")
+    rmtree(root_dir + "\\" + "generated")
     return True

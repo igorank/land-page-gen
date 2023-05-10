@@ -16,8 +16,8 @@ def home(request):
 
         context['LandingPageName'] = LandingPageName
 
-        context['section1Title'] = getSection1Title(LandingPageDetails)[0]
-        context['section1Description'] = getSection1Description(LandingPageName, LandingPageDetails)
+        context['section1Title'] = get_section_titles(LandingPageDetails)[0]
+        context['section1Description'] = get_section_descriptions(LandingPageName, LandingPageDetails)
 
         services = []
         service_titles = get_services(LandingPageDetails)
@@ -44,8 +44,8 @@ def home(request):
         context['service3Title'] = services[2]['title']
         context['service3Description'] = services[2]['description']
 
-        context['section3Title'] = getSection1Title(LandingPageDetails)
-        context['section3Description'] = getSection1Description(LandingPageName, LandingPageDetails)
+        context['section3Title'] = get_section_titles(LandingPageDetails)
+        context['section3Description'] = get_section_descriptions(LandingPageName, LandingPageDetails)
 
         context['feature1Title'] = features[0]['title']
         context['feature1Description'] = features[0]['description']

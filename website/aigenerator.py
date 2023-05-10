@@ -1,10 +1,11 @@
+import re
 import requests
 
 CHATGPT_API_IP = "89.252.17.107"
 CHATGPT_API_PORT = "8060"
 
 
-def getSection1Title(text) -> list:
+def get_section_titles(text) -> list:
     for _ in range(3):
         response = requests.post(f"http://{CHATGPT_API_IP}:{CHATGPT_API_PORT}/chatgpt",
                                  json={
@@ -32,7 +33,7 @@ def getSection1Title(text) -> list:
     raise Exception("Unable to fetch the response, Please try again")
 
 
-def getSection1Description(business_name, text) -> list:
+def get_section_descriptions(business_name, text) -> list:
     for _ in range(3):
         response = requests.post(f"http://{CHATGPT_API_IP}:{CHATGPT_API_PORT}/chatgpt",
                                  json={
@@ -127,18 +128,18 @@ def get_service_description(title) -> str:
                 answer = response.text.split(':', 1)[1]
             except IndexError:
                 return response.text.replace('"', '')
-            else:
-                return answer.replace('"', '')
+            answer_text = re.sub(r"https?:[^\s]+", '', answer, flags=re.MULTILINE)
+            return answer_text.replace('"', '')
         if response.status_code != 200:
             raise Exception("Unable to connect to ChatGPT server")
     raise Exception("Unable to fetch the response, Please try again")
 
 
-def get_feature_description(title) -> str:
+def get_feature_description(business_name, title) -> str:
     for _ in range(3):
         response = requests.post(f"http://{CHATGPT_API_IP}:{CHATGPT_API_PORT}/chatgpt",
                                  json={
-                                     'text': f"Generate a one description for the following feature: Feature Title: {title}"})
+                                     'text': f"Generate a one description for the following feature: Business Name: {business_name}. Feature Title: {title}"})
         if response.text != "Unable to fetch the response, Please try again.":
             return response.text.replace('"', '')
         if response.status_code != 200:

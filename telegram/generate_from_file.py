@@ -62,6 +62,7 @@ def get_context(landing_page_name: str, landing_page_details: str) -> dict:
     for feature in features_titles:
         obj = {}
         feature_description = aigenerator.get_feature_description(landing_page_name, feature)
+        print("feature description: " + feature_description)    # TEMP
         obj['title'] = feature
         obj['description'] = feature_description
         features.append(obj)

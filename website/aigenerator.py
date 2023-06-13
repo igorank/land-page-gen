@@ -40,7 +40,8 @@ def get_section_descriptions(business_name, text) -> list:
                                      'text': f"Generate 3 website landing page descriptions for the following business: Business Name: {business_name}. What the business does: {text}"})
         if response.text != "Unable to fetch the response, Please try again.":
             print(response.text)
-            stripped_trash = response.text.split('1', 1)[1]
+            enc_text = response.text.encode('cp1252').decode('utf8')   # TEMP ?
+            stripped_trash = enc_text.split('1', 1)[1]
             first = stripped_trash.split('\n2', 1)[0]
             second = stripped_trash.split('\n2', 1)[1].split('\n3', 1)[0]
             third = stripped_trash.split('\n2', 1)[1].split('\n3', 1)[1].split('\n', 1)[0]
@@ -124,10 +125,12 @@ def get_service_description(title) -> str:
                                  json={
                                      'text': f"Generate a one description for the following service: Servie Title: {title}"})
         if response.text != "Unable to fetch the response, Please try again.":
+            print("service description: " + response.text)    # TEMP
+            enc_text = response.text.encode('cp1252').decode('utf8')    # TEMP ?
             try:
-                answer = response.text.split(':', 1)[1]
+                answer = enc_text.split(':', 1)[1]
             except IndexError:
-                return response.text.replace('"', '')
+                return enc_text.replace('"', '')
             answer_text = re.sub(r"https?:[^\s]+", '', answer, flags=re.MULTILINE)
             return answer_text.replace('"', '')
         if response.status_code != 200:
@@ -141,7 +144,12 @@ def get_feature_description(business_name, title) -> str:
                                  json={
                                      'text': f"Generate a one description for the following feature: Business Name: {business_name}. Feature Title: {title}"})
         if response.text != "Unable to fetch the response, Please try again.":
-            return response.text.replace('"', '')
+            try:
+                answer = response.text.split(':', 1)[1]
+            except IndexError:
+                return response.text.replace('"', '')
+            answer_text = re.sub(r"https?:[^\s]+", '', answer, flags=re.MULTILINE)
+            return answer_text.replace('"', '')
         if response.status_code != 200:
             raise Exception("Unable to connect to ChatGPT server")
     raise Exception("Unable to fetch the response, Please try again")
